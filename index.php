@@ -7,7 +7,7 @@ if (isset($_COOKIE['access_token'])) {
 
 require_once 'settings.php';
 
-// Массив параметров, которые будут передаваться в GET-запросе по ссылке на аутентификацию
+// Array of parameters that will be passed in the GET request via the authentication link
 $parameters = [
     'redirect_uri'  => GOOGLE_REDIRECT_URI,
     'response_type' => 'code',
@@ -15,15 +15,16 @@ $parameters = [
     'scope'         => implode(' ', GOOGLE_SCOPES),
 ];
 
-// Ссылка для кнопки-ссылки "Login with Google"
+// Link for link button "Login with Google"
 $uri = GOOGLE_AUTH_URI . '?' . urldecode(http_build_query($parameters));
 
-// Проверяем передан ли в GET-запросе парметр "code". Это код, который поможет достать токен доступа (Access Token)
-// С помощью Access Token мы сможем общаться с Google API и доставать нужную информацию о пользователе.
+// Check if the "code" parameter was passed in the GET request.
+// This is the code that will help you get the access token (Access Token)
 if (!isset($_COOKIE['access_token']) && isset($_GET['code'])) {
     $result = false;
 
-    // Массив параметров, которые будут передаваться в POST-запросе по ссылке на получение токена и в GET-запрсое по ссылке на получение информации о пользователе
+    // An array of parameters that will be passed in a POST request using a link to get a token
+    // and in a GET request using a link to get user information
     $parameters = [
         'client_id'     => GOOGLE_CLIENT_ID,
         'client_secret' => GOOGLE_CLIENT_SECRET,
@@ -32,7 +33,7 @@ if (!isset($_COOKIE['access_token']) && isset($_GET['code'])) {
         'code'          => $_GET['code'],
     ];
 
-    // POST-запрос на получение токена
+    // POST request to get a token
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, GOOGLE_TOKEN_URI);
     curl_setopt($curl, CURLOPT_POST, 1);
@@ -44,7 +45,7 @@ if (!isset($_COOKIE['access_token']) && isset($_GET['code'])) {
 
     $tokenInfo = json_decode($result, true);
 
-    // Получение информации о пользователе
+    // Getting information about a user
     if (isset($tokenInfo['access_token'])) {
         $parameters['access_token'] = $tokenInfo['access_token'];
         setcookie('access_token', $tokenInfo['access_token'], time() + $tokenInfo['expires_in']);
